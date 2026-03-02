@@ -1,9 +1,11 @@
 local PLAYER_FACTION_KEY  = "wh2_main_hef_order_of_loremasters"
 local AISLINN_FACTION_KEY = "wh3_dlc27_hef_aislinn"
+local TOWER_FACTION_KEY   = "wh3_dlc27_special_tower_of_the_sun_secondary"
 
 local SAVE_KEY_SETUP  = "unlock_dragonships_setup_done"
 local SAVE_KEY_SPAWN  = "unlock_dragonships_spawned_done"
 local SAVE_KEY_SUPPLY = "unlock_dragonships_supplies_seeded"
+local SAVE_KEY_TOWER  = "unlock_dragonships_tower_done"
 
 local DRAGONSHIPS = {
     { subtype = "wh3_dlc27_hef_dragonship_captain_01", art = "wh3_dlc27_art_set_hef_dragonship_captain_1" },
@@ -45,6 +47,7 @@ local DRAGONSHIP_SUPPLIES_PER_TURN     = 300
 cm:add_first_tick_callback(function()
     if cm:get_local_faction_name(true) ~= PLAYER_FACTION_KEY then return end
 
+    -- One-time: confed Aislinn + add dragonships
     if not cm:get_saved_value(SAVE_KEY_SETUP) then
         local aislinn = cm:get_faction(AISLINN_FACTION_KEY)
         if aislinn and not aislinn:is_dead() then
@@ -55,6 +58,27 @@ cm:add_first_tick_callback(function()
         cm:set_saved_value(SAVE_KEY_SETUP, true)
     end
 
+    -- One-time: try confed Tower faction; if it doesn't stick, transfer region
+    if not cm:get_saved_value(SAVE_KEY_TOWER) then
+        local tower = cm:get_faction(TOWER_FACTION_KEY)
+        if tower and not tower:is_dead() then
+            cm:force_confederation(PLAYER_FACTION_KEY, TOWER_FACTION_KEY)
+        end
+
+        -- Fallback: ensure Tower of the Stars ends up yours
+        local region_key = "wh3_main_combi_region_tower_of_the_stars"
+        local region = cm:get_region(region_key)
+        if region and not region:is_null_interface() then
+            local owner = region:owning_faction()
+            if owner and not owner:is_null_interface() and owner:name() ~= PLAYER_FACTION_KEY then
+                cm:transfer_region_to_faction(region_key, PLAYER_FACTION_KEY)
+            end
+        end
+
+        cm:set_saved_value(SAVE_KEY_TOWER, true)
+    end
+
+    -- One-time: seed supplies
     if not cm:get_saved_value(SAVE_KEY_SUPPLY) then
         cm:faction_add_pooled_resource(
             PLAYER_FACTION_KEY,
