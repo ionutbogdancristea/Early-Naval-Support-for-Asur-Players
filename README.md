@@ -1,9 +1,12 @@
 # Early-Naval-Support-for-Asur-Players
 Total War Warhammer 3 mod that helps the player get full Asur fleet support on turn 1
 
+Done
+- Turn 1 confed Aislinn
+- All 5 other Dragonships available for recruitment
+- Initial dragonship supplies + steady supplies per turn
+- Confed Tower of Stars Minor Faction
 
--- cm:add_first_tick_callback(function()
---     local faction_key = cm:get_local_faction_name(true)
---     cm:treasury_mod(faction_key, 10000)
---     out("[UNLOCK_DRAGONSHIPS] Script loaded. Added 10000 gold to " .. tostring(faction_key))
--- end)
+To do
+- Remove deep sea / coral reef attrition for Dragonships
+- Unlock Aislin's sealanes for Dragonships
