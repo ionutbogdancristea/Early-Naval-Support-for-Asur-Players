@@ -38,48 +38,38 @@ local function spawn_dragonships_once_for_faction(faction_key)
     cm:set_saved_value(spawn_key, true)
 end
 
--- Turn 1 setup: confed + dragonship lords in pool
-cm:add_first_tick_callback(function()
-    if cm:get_saved_value(SAVE_KEY_SETUP) then return end
-    if cm:get_local_faction_name(true) ~= PLAYER_FACTION_KEY then return end
-
-    local aislinn = cm:get_faction(AISLINN_FACTION_KEY)
-    if aislinn and not aislinn:is_dead() then
-        cm:force_confederation(PLAYER_FACTION_KEY, AISLINN_FACTION_KEY)
-    end
-
-    spawn_dragonships_once_for_faction(PLAYER_FACTION_KEY)
-
-    cm:set_saved_value(SAVE_KEY_SETUP, true)
-end)
-
--- Dragonship supplies
 local DRAGONSHIP_SUPPLIES_RESOURCE_KEY = "wh3_dlc27_hef_naval_supplies"
 local DRAGONSHIP_SUPPLIES_FACTOR_KEY   = "faction"
-local DRAGONSHIP_SUPPLIES_PER_TURN     = 1000
+local DRAGONSHIP_SUPPLIES_PER_TURN     = 300
 
--- One-time seed on campaign start
 cm:add_first_tick_callback(function()
     if cm:get_local_faction_name(true) ~= PLAYER_FACTION_KEY then return end
-    if cm:get_saved_value(SAVE_KEY_SUPPLY) then return end
 
-    cm:faction_add_pooled_resource(
-        PLAYER_FACTION_KEY,
-        DRAGONSHIP_SUPPLIES_RESOURCE_KEY,
-        DRAGONSHIP_SUPPLIES_FACTOR_KEY,
-        500
-    )
+    if not cm:get_saved_value(SAVE_KEY_SETUP) then
+        local aislinn = cm:get_faction(AISLINN_FACTION_KEY)
+        if aislinn and not aislinn:is_dead() then
+            cm:force_confederation(PLAYER_FACTION_KEY, AISLINN_FACTION_KEY)
+        end
 
-    cm:set_saved_value(SAVE_KEY_SUPPLY, true)
+        spawn_dragonships_once_for_faction(PLAYER_FACTION_KEY)
+        cm:set_saved_value(SAVE_KEY_SETUP, true)
+    end
+
+    if not cm:get_saved_value(SAVE_KEY_SUPPLY) then
+        cm:faction_add_pooled_resource(
+            PLAYER_FACTION_KEY,
+            DRAGONSHIP_SUPPLIES_RESOURCE_KEY,
+            DRAGONSHIP_SUPPLIES_FACTOR_KEY,
+            500
+        )
+        cm:set_saved_value(SAVE_KEY_SUPPLY, true)
+    end
 end)
 
--- Per-turn income
 core:add_listener(
     "UnlockDragonships_AddSuppliesEachTurn",
     "FactionTurnStart",
-    function(context)
-        return context:faction():name() == PLAYER_FACTION_KEY
-    end,
+    function(context) return context:faction():name() == PLAYER_FACTION_KEY end,
     function()
         cm:faction_add_pooled_resource(
             PLAYER_FACTION_KEY,
