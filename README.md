@@ -7,7 +7,7 @@ Done
 - Initial dragonship supplies + steady supplies per turn
 - Confed Tower of Stars Minor Faction
 - Custom names to Dragonships Captains
+- All dragonships (including Aislinn) have immunity to Storm, Reef and Deep Sea attrition
 
 To do
-- Remove deep sea / coral reef attrition for Dragonships
 - Unlock Aislin's sealanes for Dragonships
