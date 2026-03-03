@@ -2,10 +2,11 @@ local PLAYER_FACTION_KEY  = "wh2_main_hef_order_of_loremasters"
 local AISLINN_FACTION_KEY = "wh3_dlc27_hef_aislinn"
 local TOWER_FACTION_KEY   = "wh3_dlc27_special_tower_of_the_sun_secondary"
 
-local SAVE_KEY_SETUP  = "unlock_dragonships_setup_done"
-local SAVE_KEY_SPAWN  = "unlock_dragonships_spawned_done"
-local SAVE_KEY_SUPPLY = "unlock_dragonships_supplies_seeded"
-local SAVE_KEY_TOWER  = "unlock_dragonships_tower_done"
+local SAVE_KEY_SETUP   = "unlock_dragonships_setup_done"
+local SAVE_KEY_SPAWN   = "unlock_dragonships_spawned_done"
+local SAVE_KEY_SUPPLY  = "unlock_dragonships_supplies_seeded"
+local SAVE_KEY_TOWER   = "unlock_dragonships_tower_done"
+local SAVE_KEY_AIS_IMM = "unlock_dragonships_aislinn_sea_immunity_done"
 
 local DRAGONSHIPS = {
     { subtype = "wh3_dlc27_hef_dragonship_captain_01", art = "wh3_dlc27_art_set_hef_dragonship_captain_1" },
@@ -23,6 +24,14 @@ local DRAGONSHIP_NAME_KEYS = {
     ["wh3_dlc27_hef_dragonship_captain_05"] = { forename = "names_name_9931010009", surname = "names_name_9931010010" },
 }
 
+local function is_dragonship_subtype(st)
+    return st == "wh3_dlc27_hef_dragonship_captain_01"
+        or st == "wh3_dlc27_hef_dragonship_captain_02"
+        or st == "wh3_dlc27_hef_dragonship_captain_03"
+        or st == "wh3_dlc27_hef_dragonship_captain_04"
+        or st == "wh3_dlc27_hef_dragonship_captain_05"
+end
+
 local function spawn_dragonships_once_for_faction(faction_key)
     local faction = cm:get_faction(faction_key)
     if faction:is_null_interface() or faction:is_dead() then return end
@@ -33,10 +42,10 @@ local function spawn_dragonships_once_for_faction(faction_key)
     for i = 1, #DRAGONSHIPS do
         local subtype = DRAGONSHIPS[i].subtype
         local n = DRAGONSHIP_NAME_KEYS[subtype]
-    
+
         local forename = (n and n.forename) or "names_name_1819815097"
         local surname  = (n and n.surname)  or "names_name_509665994"
-    
+
         cm:spawn_character_to_pool(
             faction_key,
             forename,
@@ -54,10 +63,47 @@ local function spawn_dragonships_once_for_faction(faction_key)
     cm:set_saved_value(spawn_key, true)
 end
 
+-- Dragonship supplies
 local DRAGONSHIP_SUPPLIES_RESOURCE_KEY = "wh3_dlc27_hef_naval_supplies"
 local DRAGONSHIP_SUPPLIES_FACTOR_KEY   = "faction"
 local DRAGONSHIP_SUPPLIES_PER_TURN     = 300
 
+-- Sea immunity bundle (you already created this in DB)
+local DRAGONSHIP_SEA_IMMUNITY_BUNDLE = "unlock_dragonship_sea_immunity_bundle"
+
+local function apply_sea_immunity_to_force(mf)
+    if mf:is_null_interface() then return end
+    cm:apply_effect_bundle_to_force(
+        DRAGONSHIP_SEA_IMMUNITY_BUNDLE,
+        mf:command_queue_index(),
+        9999
+    )
+end
+
+local function try_apply_sea_immunity_to_aislinn()
+    if cm:get_saved_value(SAVE_KEY_AIS_IMM) then return end
+
+    local f = cm:get_faction(PLAYER_FACTION_KEY)
+    if f:is_null_interface() or f:is_dead() then return end
+
+    local cl = f:character_list()
+    for i = 0, cl:num_items() - 1 do
+        local c = cl:item_at(i)
+        if not c:is_null_interface()
+            and c:has_military_force()
+            and c:character_subtype_key() == "wh3_dlc27_hef_aislinn"
+        then
+            local mf = c:military_force()
+            if not mf:is_null_interface() then
+                apply_sea_immunity_to_force(mf)
+                cm:set_saved_value(SAVE_KEY_AIS_IMM, true)
+                return
+            end
+        end
+    end
+end
+
+-- Turn 1 setup
 cm:add_first_tick_callback(function()
     if cm:get_local_faction_name(true) ~= PLAYER_FACTION_KEY then return end
 
@@ -79,7 +125,6 @@ cm:add_first_tick_callback(function()
             cm:force_confederation(PLAYER_FACTION_KEY, TOWER_FACTION_KEY)
         end
 
-        -- Fallback: ensure Tower of the Stars ends up yours
         local region_key = "wh3_main_combi_region_tower_of_the_stars"
         local region = cm:get_region(region_key)
         if region and not region:is_null_interface() then
@@ -102,8 +147,14 @@ cm:add_first_tick_callback(function()
         )
         cm:set_saved_value(SAVE_KEY_SUPPLY, true)
     end
+
+    -- Aislinn might not be “ready” on exact first tick; do a tiny delayed attempt
+    cm:callback(function()
+        try_apply_sea_immunity_to_aislinn()
+    end, 0.2)
 end)
 
+-- Per-turn supply income
 core:add_listener(
     "UnlockDragonships_AddSuppliesEachTurn",
     "FactionTurnStart",
@@ -115,6 +166,36 @@ core:add_listener(
             DRAGONSHIP_SUPPLIES_FACTOR_KEY,
             DRAGONSHIP_SUPPLIES_PER_TURN
         )
+    end,
+    true
+)
+
+-- Give sea immunity to any Dragonship Admiral force when the character is created
+core:add_listener(
+    "UnlockDragonships_SeaImmunity_Dragonships",
+    "CharacterCreated",
+    function(context)
+        local c = context:character()
+        if c:is_null_interface() then return false end
+        if c:faction():name() ~= PLAYER_FACTION_KEY then return false end
+        return is_dragonship_subtype(c:character_subtype_key())
+    end,
+    function(context)
+        local c = context:character()
+        local mf = c:military_force()
+        if mf:is_null_interface() then return end
+        apply_sea_immunity_to_force(mf)
+    end,
+    true
+)
+
+-- Keep trying to apply sea immunity to Aislinn until we successfully find him once
+core:add_listener(
+    "UnlockDragonships_SeaImmunity_AislinnRetry",
+    "FactionTurnStart",
+    function(context) return context:faction():name() == PLAYER_FACTION_KEY end,
+    function()
+        try_apply_sea_immunity_to_aislinn()
     end,
     true
 )
