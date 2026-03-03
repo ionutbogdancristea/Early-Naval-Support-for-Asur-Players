@@ -8,6 +8,8 @@ Done
 - Confed Tower of Stars Minor Faction
 - Custom names to Dragonships Captains
 - All dragonships (including Aislinn) have immunity to Storm, Reef and Deep Sea attrition
+- Unlock Aislin's sealanes for Dragonships
 
 To do
-- Unlock Aislin's sealanes for Dragonships
+- dragonships have no skills
+- wounded and resurrected aislinn loses immunity to Storm, Reef and Deep Sea attrition
