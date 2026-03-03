@@ -12,3 +12,4 @@ Done
 
 To do
 - wounded and resurrected dragonships and aislinn lose immunity to Storm, Reef and Deep Sea attrition
+- give growth per turn to dragonships and aislinn
