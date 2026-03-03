@@ -11,5 +11,4 @@ Done
 - Unlock Aislin's sealanes for Dragonships
 
 To do
-- dragonships have no skills
-- wounded and resurrected aislinn loses immunity to Storm, Reef and Deep Sea attrition
+- wounded and resurrected dragonships and aislinn lose immunity to Storm, Reef and Deep Sea attrition
