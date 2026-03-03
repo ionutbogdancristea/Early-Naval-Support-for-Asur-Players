@@ -15,6 +15,14 @@ local DRAGONSHIPS = {
     { subtype = "wh3_dlc27_hef_dragonship_captain_05", art = "wh3_dlc27_art_set_hef_dragonship_captain_5" },
 }
 
+local DRAGONSHIP_NAME_KEYS = {
+    ["wh3_dlc27_hef_dragonship_captain_01"] = { forename = "names_name_9931010001", surname = "names_name_9931010002" },
+    ["wh3_dlc27_hef_dragonship_captain_02"] = { forename = "names_name_9931010003", surname = "names_name_9931010004" },
+    ["wh3_dlc27_hef_dragonship_captain_03"] = { forename = "names_name_9931010005", surname = "names_name_9931010006" },
+    ["wh3_dlc27_hef_dragonship_captain_04"] = { forename = "names_name_9931010007", surname = "names_name_9931010008" },
+    ["wh3_dlc27_hef_dragonship_captain_05"] = { forename = "names_name_9931010009", surname = "names_name_9931010010" },
+}
+
 local function spawn_dragonships_once_for_faction(faction_key)
     local faction = cm:get_faction(faction_key)
     if faction:is_null_interface() or faction:is_dead() then return end
@@ -23,15 +31,21 @@ local function spawn_dragonships_once_for_faction(faction_key)
     if cm:get_saved_value(spawn_key) then return end
 
     for i = 1, #DRAGONSHIPS do
+        local subtype = DRAGONSHIPS[i].subtype
+        local n = DRAGONSHIP_NAME_KEYS[subtype]
+    
+        local forename = (n and n.forename) or "names_name_1819815097"
+        local surname  = (n and n.surname)  or "names_name_509665994"
+    
         cm:spawn_character_to_pool(
             faction_key,
-            "names_name_1819815097",
-            "names_name_509665994",
+            forename,
+            surname,
             "", "",
             50,
             true,
             "general",
-            DRAGONSHIPS[i].subtype,
+            subtype,
             true,
             DRAGONSHIPS[i].art
         )
