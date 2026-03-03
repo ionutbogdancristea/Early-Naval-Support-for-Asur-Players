@@ -6,6 +6,7 @@ Done
 - All 5 other Dragonships available for recruitment
 - Initial dragonship supplies + steady supplies per turn
 - Confed Tower of Stars Minor Faction
+- Custom names to Dragonships Captains
 
 To do
 - Remove deep sea / coral reef attrition for Dragonships
