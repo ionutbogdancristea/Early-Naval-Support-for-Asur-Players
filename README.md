@@ -1,5 +1,5 @@
 # Early-Naval-Support-for-Asur-Players
-Total War Warhammer 3 mod that helps the player get full Asur fleet support on turn 1
+Total War Warhammer 3 mod that helps the player get full Asur fleet support on turn 1, when playing as Teclis.
 
 Done
 - Turn 1 confed Aislinn
