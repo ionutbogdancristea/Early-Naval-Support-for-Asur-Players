@@ -7,9 +7,8 @@ Done
 - Initial dragonship supplies + steady supplies per turn
 - Confed Tower of Stars Minor Faction
 - Custom names to Dragonships Captains
-- All dragonships (including Aislinn) have immunity to Storm, Reef and Deep Sea attrition
+- All dragonships (including Aislinn) have immunity to Storm, Reef and Deep Sea attrition - wounded and resurrected dragonships and aislinn keep their immunity
 - Unlock Aislin's sealanes for Dragonships
 
 To do
-- wounded and resurrected dragonships and aislinn lose immunity to Storm, Reef and Deep Sea attrition
 - give growth per turn to dragonships and aislinn
