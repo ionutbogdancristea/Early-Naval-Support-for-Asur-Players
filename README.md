@@ -9,6 +9,4 @@ Done
 - Custom names to Dragonships Captains
 - All dragonships (including Aislinn) have immunity to Storm, Reef and Deep Sea attrition - wounded and resurrected dragonships and aislinn keep their immunity
 - Unlock Aislin's sealanes for Dragonships
-
-To do
-- give growth per turn to dragonships and aislinn
+- regular growth per turn to dragonships and aislinn
